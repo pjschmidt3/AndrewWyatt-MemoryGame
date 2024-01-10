@@ -20,7 +20,6 @@ function GameBoard({ cardInfo }) {
   const [cards, setCards] = useState([]);
   const [turns, setTurns] = useState(0);
   const [isDisabled, setIsDisabled] = useState(false);
-  const [flippedCards, setFlippedCards] = useState([]);
   const [pickOne, setPickOne] = useState(null);
   const [pickTwo, setPickTwo] = useState(null);
   console.log(pickOne);
@@ -31,80 +30,57 @@ function GameBoard({ cardInfo }) {
       return;
     }
 
-    if (!pickOne){
+    if (!pickOne) {
       setPickOne(selectedCard);
-    }else if (!pickTwo){
+    } else if (!pickTwo) {
       setPickTwo(selectedCard);
 
       if (selectedCard.pairId !== pickOne.pairId) {
         setIsDisabled(true);
 
         setTimeout(() => {
+          flipCard(pickOne);
+          flipCard(selectedCard);
           setIsDisabled(false);
         }, 500);
       }
+      
+      nextTurn();
     }
-
   
-   flipCard(selectedCard);
-    setFlippedCards([...flippedCards, selectedCard]);
-    incrementTurns();
+    flipCard(selectedCard);
   };
+  
   const incrementTurns =() => {
-    setTurns((prevTurns) => prevTurns +1 );
+    setTurns((prevTurns) => prevTurns + 1);
   };
 
   const flipCard = (selectedCard) => {
-    //  const updatedCards = cards.map((card) =>
-    //  card.id === selectedCard.id ? { ...card, flipped: !card.flipped } : card
-    //);
-    //setCards(updatedCards);
-
-    //setState with the "updated/current version of state instead of the stuck version"
-    setCards((prevCards) => {
-      console.log(prevCards)
-      const updatedCards = prevCards.map((card) => {
-       return card.id == selectedCard.id ? {...card, flipped: !card.flipped } : card;
-      });
-      console.log(updatedCards)
-      return updatedCards;
-    })
-
-
-  }
-
-  // Need useffect to get this going
-  useEffect(() => {
-    // setTimeout(() => {
-      if (pickOne && pickTwo){
-        if (pickOne.pairId === pickTwo.pairId){
-          console.log('we matched!');
-        } else if (pickOne.pairId !== pickTwo.pairId) {
-
-          console.log('these cards did not match');
-          setTimeout(() => {
-            flipCard(pickOne);
-            flipCard(pickTwo);
-            resetTurn();
-          }, 500);
-        }
-      }
-    // }, 1000)
-   }, [pickOne, pickTwo]);
+    const updatedCards = cards;
+    const idx = cards.findIndex(card => card.id === selectedCard.id);
+    selectedCard.flipped = !selectedCard.flipped;
+    updatedCards.splice(idx, 1, selectedCard);
+    
+    setCards(updatedCards);
+  };
   
-  const resetTurn = () => {
+  const resetSelected = () => {
     setPickOne(null);
     setPickTwo(null);
-    setTurns((prevTurns) => prevTurns +1)
-  }
-
-
+  };
+  
+  const nextTurn = () => {
+    resetSelected();
+    incrementTurns();
+  };
+  
+  
   const shuffleCards = () => {
     // "Read the "... spreads the Array"
     const shuffledCards = [...Object.values(frontCardImg)]
       .sort(() => Math.random() - 0.5) //might be good might be bad
       .map((card) => ({ ...card, flipped: card.flipped }));
-    resetTurn();
+    nextTurn();
     setCards(shuffledCards);
     setTurns(0);
   };
@@ -122,6 +98,6 @@ function GameBoard({ cardInfo }) {
       <Points turns={turns}/>
     </div>
   );
-};
+}
 
 export default GameBoard;
