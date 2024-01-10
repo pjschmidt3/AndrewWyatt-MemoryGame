@@ -34,7 +34,8 @@ function GameBoard({ cardInfo }) {
       setPickOne(selectedCard);
     } else if (!pickTwo) {
       setPickTwo(selectedCard);
-
+      
+      // if no match, disable cards and set .5s timeout to flip them back and re-enable
       if (selectedCard.pairId !== pickOne.pairId) {
         setIsDisabled(true);
 
@@ -45,6 +46,8 @@ function GameBoard({ cardInfo }) {
         }, 500);
       }
       
+      
+      // increment the turn only after the second selection
       nextTurn();
     }
   
@@ -56,11 +59,15 @@ function GameBoard({ cardInfo }) {
   };
 
   const flipCard = (selectedCard) => {
+    // make a copy of cards array
     const updatedCards = cards;
+    
+    // find the index of the card to update, then update it in place via splice()
     const idx = cards.findIndex(card => card.id === selectedCard.id);
     selectedCard.flipped = !selectedCard.flipped;
     updatedCards.splice(idx, 1, selectedCard);
     
+    // update the state so changes take effect
     setCards(updatedCards);
   };
   
@@ -74,7 +81,6 @@ function GameBoard({ cardInfo }) {
     incrementTurns();
   };
   
-  
   const shuffleCards = () => {
     // "Read the "... spreads the Array"
     const shuffledCards = [...Object.values(frontCardImg)]
@@ -84,8 +90,7 @@ function GameBoard({ cardInfo }) {
     setCards(shuffledCards);
     setTurns(0);
   };
- 
-
+  
   return (
     <div className="App">
       <h1>Memory Game</h1>
